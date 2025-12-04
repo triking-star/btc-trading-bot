@@ -7,7 +7,7 @@ import os
 import json
 
 # ===== CONFIG =====
-TELEGRAM_TOKEN = '8203299364:AAHS-apfA_qN4C9q8aJmtIYo6ecxeMl8TaM'
+TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
 CHAT_ID = '7426005448'
 
 SYMBOL = 'BTC'
