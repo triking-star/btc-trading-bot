@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import requests
 import pandas as pd
-import pandas_ta as ta
+import numpy as np
 from datetime import datetime
 import os
 
@@ -67,6 +67,38 @@ def get_btc_data():
         print(f"❌ Error: {e}")
         return None
 
+def calculate_rsi(prices, period=14):
+    """Calculate RSI using NumPy"""
+    deltas = np.diff(prices)
+    seed = deltas[:period+1]
+    up = seed[seed>=0].sum()/period
+    down = -seed[seed<0].sum()/period
+    rs = up/down if down != 0 else 0
+    rsi = np.zeros_like(prices)
+    rsi[:period] = 100. - 100./(1. + rs)
+    for i in range(period, len(prices)):
+        delta = deltas[i-1]
+        if delta>0:
+            upval = delta
+            downval = 0.
+        else:
+            upval = 0.
+            downval = -delta
+        up = (up*(period-1) + upval)/period
+        down = (down*(period-1) + downval)/period
+        rs = up/down if down != 0 else 0
+        rsi[i] = 100. - 100./(1. + rs)
+    return rsi
+
+def calculate_ema(prices, period):
+    """Calculate EMA using NumPy"""
+    ema = np.zeros_like(prices, dtype=float)
+    ema[0] = prices[0]
+    multiplier = 2.0 / (period + 1.0)
+    for i in range(1, len(prices)):
+        ema[i] = prices[i] * multiplier + ema[i-1] * (1 - multiplier)
+    return ema
+
 def analyze_market():
     """วิเคราะห์ BTC"""
     try:
@@ -77,9 +109,9 @@ def analyze_market():
         if df is None or len(df) == 0:
             raise Exception("No data")
         
-        df['rsi'] = ta.rsi(df['close'], length=RSI_PERIOD)
-        df['ema_fast'] = ta.ema(df['close'], length=EMA_FAST)
-        df['ema_slow'] = ta.ema(df['close'], length=EMA_SLOW)
+        df['rsi'] = calculate_rsi(df['close'].values, RSI_PERIOD)
+        df['ema_fast'] = calculate_ema(df['close'].values, EMA_FAST)
+        df['ema_slow'] = calculate_ema(df['close'].values, EMA_SLOW)
         
         df_clean = df.dropna(subset=['rsi', 'ema_fast', 'ema_slow']).copy()
         
