@@ -2,8 +2,7 @@ name: BTC Trading Bot
 
 on:
   schedule:
-    - cron: '0 * * * *'  # Runs every hour
-  workflow_dispatch:  # Allows manual trigger
+    - cron: '*/10 * * * *'  # Runs every 10 minutes  workflow_dispatch:  # Allows manual trigger
 
 jobs:
   run-bot:
