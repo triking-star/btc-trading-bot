@@ -126,9 +126,9 @@ def analyze_market():
             thailand_time = datetime.now(THAILAND_TZ).strftime('%Y-%m-%d %H:%M:%S')
             print(f"\n🔍 [{thailand_time}] Analyzing BTC...")
         
-        df = get_btc_data()
-        if df is None or len(df) == 0:
-            raise Exception("No data")
+            df = get_btc_data()
+            if df is None or len(df) == 0:
+                raise Exception("No data")
         
         df['rsi'] = calculate_rsi(df['close'].values, RSI_PERIOD)
         df['ema_fast'] = calculate_ema(df['close'].values, EMA_FAST)
