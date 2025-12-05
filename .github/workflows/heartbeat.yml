@@ -1,0 +1,29 @@
+name: Bot Heartbeat
+
+on:
+  schedule:
+    - cron: '0 * * * *'  # ทุก 1 ชั่วโมง เวลา :00
+  workflow_dispatch:
+
+jobs:
+  send-heartbeat:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      
+      - name: Send heartbeat
+        env:
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+        run: python bot.py heartbeat
