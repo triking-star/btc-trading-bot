@@ -190,19 +190,8 @@ def analyze_market():
             send_telegram_message(alert_msg)
             print("🚨 ALERT SENT!")
         else:
-            print("➡️ Market normal")
-            normal_msg = (
-                f"✅ *Market Check Complete*\n\n"
-                f"📊 BTC: `${last_price:,.2f}`\n"
-                f"RSI(14): `{last_rsi:.2f}`\n"
-                f"EMA {EMA_FAST}: `{ema_fast_last:.2f}`\n"
-                f"EMA {EMA_SLOW}: `{ema_slow_last:.2f}`\n"
-                f"Status: Normal (no alerts)\n"
-                f"Time: `{timestamp}`"
-            )
-            send_telegram_message(normal_msg)
-            print("✅ Normal update sent to Telegram")
-
+        print("➡️ Market normal (no alerts, no Telegram message sent)")                f"Time: `{timestamp}`"
+            
     except Exception as e:
         print(f"❌ Error: {type(e).__name__}: {e}")
         send_telegram_message(f"⚠️ *Bot Error!*\n`{type(e).__name__}: {str(e)[:150]}`")
