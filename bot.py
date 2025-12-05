@@ -190,8 +190,7 @@ def analyze_market():
             send_telegram_message(alert_msg)
             print("🚨 ALERT SENT!")
         else:
-        print("🎯 Market normal (no alerts, no Telegram message sent)")            
-    except Exception as e:
+            print("🎯 Market normal (no alerts, no Telegram message sent)")    except Exception as e:
         print(f"❌ Error: {type(e).__name__}: {e}")
         send_telegram_message(f"⚠️ *Bot Error!*\n`{type(e).__name__}: {str(e)[:150]}`")
 
