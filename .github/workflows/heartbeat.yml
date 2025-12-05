@@ -2,8 +2,7 @@ name: Bot Heartbeat
 
 on:
   schedule:
-    - cron: '0 * * * *'  # ทุก 1 ชั่วโมง เวลา :00
-  workflow_dispatch:
+    - cron: '*/5 * * * *'  # ทุก 5 นาที เวลา :00, :05, :10, :15, ...  workflow_dispatch:
 
 jobs:
   send-heartbeat:
