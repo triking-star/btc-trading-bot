@@ -123,7 +123,8 @@ def calculate_ema(prices, period):
 def analyze_market():
     """วิเคราะห์ BTC"""
     try:
-        thailand_time = datetime.now(THAILAND_TZ).strftime('%Y-%m-%d %H:%M:%S')        print(f"\n🔍 [{timestamp}] Analyzing BTC...")
+            thailand_time = datetime.now(THAILAND_TZ).strftime('%Y-%m-%d %H:%M:%S')
+        print(f"\n🔍 [{thailand_time}] Analyzing BTC...")
         
         df = get_btc_data()
         if df is None or len(df) == 0:
