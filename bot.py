@@ -2,13 +2,13 @@
 import requests
 import pandas as pd
 import numpy as np
-from datetime import datetime, timedelta
+from datetime import datetime
 import os
-import pytz
 
 # ===== CONFIG =====
 TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
 CHAT_ID = '7426005448'
+
 SYMBOL = 'BTC'
 RSI_PERIOD = 14
 RSI_OVERBOUGHT = 70
@@ -76,7 +76,6 @@ def calculate_rsi(prices, period=14):
     rs = up/down if down != 0 else 0
     rsi = np.zeros_like(prices)
     rsi[:period] = 100. - 100./(1. + rs)
-    
     for i in range(period, len(prices)):
         delta = deltas[i-1]
         if delta>0:
@@ -85,12 +84,10 @@ def calculate_rsi(prices, period=14):
         else:
             upval = 0.
             downval = -delta
-        
         up = (up*(period-1) + upval)/period
         down = (down*(period-1) + downval)/period
         rs = up/down if down != 0 else 0
         rsi[i] = 100. - 100./(1. + rs)
-    
     return rsi
 
 def calculate_ema(prices, period):
@@ -98,39 +95,14 @@ def calculate_ema(prices, period):
     ema = np.zeros_like(prices, dtype=float)
     ema[0] = prices[0]
     multiplier = 2.0 / (period + 1.0)
-    
     for i in range(1, len(prices)):
         ema[i] = prices[i] * multiplier + ema[i-1] * (1 - multiplier)
-    
     return ema
-
-def get_thailand_time():
-    """Get Thailand time (UTC+7)"""
-    utc_tz = pytz.UTC
-    thailand_tz = pytz.timezone('Asia/Bangkok')
-    utc_time = datetime.now(utc_tz)
-    thailand_time = utc_time.astimezone(thailand_tz)
-    return thailand_time
-
-def send_heartbeat():
-    """ส่ง Heartbeat status ทุก 5 นาที"""
-    thailand_time = get_thailand_time()
-    timestamp = thailand_time.strftime('%Y-%m-%d %H:%M:%S')
-    
-    heartbeat_msg = f"✅ *Bot Status Check - Still Running!*\n\n"
-    heartbeat_msg += f"⏰ Check Time: `{timestamp}`\n"
-    heartbeat_msg += f"📊 Status: `HEALTHY`\n"
-    heartbeat_msg += f"🔍 Service: Monitoring BTC 24/7\n"
-    heartbeat_msg += f"🚨 Alert System: Active & Ready"
-    
-    send_telegram_message(heartbeat_msg)
-    print("✅ Heartbeat sent to Telegram")
 
 def analyze_market():
     """วิเคราะห์ BTC"""
     try:
-        thailand_time = get_thailand_time()
-        timestamp = thailand_time.strftime('%Y-%m-%d %H:%M:%S')
+        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         print(f"\n🔍 [{timestamp}] Analyzing BTC...")
         
         df = get_btc_data()
@@ -190,19 +162,20 @@ def analyze_market():
             print("🚨 ALERT SENT!")
         else:
             print("➡️ Market normal")
-            
-            # Send normal market update to Telegram
-            normal_msg = f"🟢 *Market Check Complete*\n\n"
-            normal_msg += f"💰 BTC: `${last_price:,.2f}`\n"
-            normal_msg += f"📊 RSI(14): `{last_rsi:.2f}`\n"
-            normal_msg += f"📈 EMA {EMA_FAST}: `{ema_fast_last:.2f}`\n"
-            normal_msg += f"📉 EMA {EMA_SLOW}: `{ema_slow_last:.2f}`\n"
-            normal_msg += f"✅ Status: Normal (no alerts)\n"
-            normal_msg += f"⏰ Time: `{timestamp}`"
-            
-            send_telegram_message(normal_msg)
-            print("✅ Normal update sent to Telegram")
-            
+                    
+        # Send normal market update to Telegram
+        normal_msg = f"✅ *Market Check Complete*\n\n"
+        normal_msg += f"📊 *BTC Data:*\n"
+        normal_msg += f"Price: `${last_price:,.2f}`\n"
+        normal_msg += f"RSI(14): `{last_rsi:.2f}`\n"
+        normal_msg += f"EMA {EMA_FAST}: `{ema_fast_last:.2f}`\n"
+        normal_msg += f"EMA {EMA_SLOW}: `{ema_slow_last:.2f}`\n"
+        normal_msg += f"Status: ➡️ Normal (no alerts)\n"
+        normal_msg += f"Time: `{timestamp}`"
+        
+        send_telegram_message(normal_msg)
+        print("✅ Normal update sent to Telegram")
+        
     except Exception as e:
         print(f"❌ Error: {type(e).__name__}: {e}")
         send_telegram_message(f"⚠️ *Bot Error!*\n`{type(e).__name__}: {str(e)[:150]}`")
@@ -211,10 +184,4 @@ if __name__ == "__main__":
     print("=" * 70)
     print("🤖 BTC Trading Bot - GitHub Actions Version")
     print("=" * 70)
-    
-    # เช็คว่ารันแบบไหน
-    import sys
-    if len(sys.argv) > 1 and sys.argv[1] == "heartbeat":
-        send_heartbeat()
-    else:
-        analyze_market()
+    analyze_market()
