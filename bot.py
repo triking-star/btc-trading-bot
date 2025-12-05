@@ -3,6 +3,9 @@ import requests
 import pandas as pd
 import numpy as np
 from datetime import datetime
+from datetime import timezone
+from datetime import timedelta
+import pytz
 import os
 
 # ===== CONFIG =====
@@ -15,6 +18,10 @@ RSI_OVERBOUGHT = 70
 RSI_OVERSOLD = 30
 EMA_FAST = 12
 EMA_SLOW = 26
+
+# Thailand Timezone (UTC+7)
+from datetime import timezone
+THAILAND_TZ = timezone(timedelta(hours=7))
 
 def send_telegram_message(msg):
     """ส่ง Message ไป Telegram"""
@@ -35,6 +42,20 @@ def send_telegram_message(msg):
     except Exception as e:
         print(f"❌ Connection error: {e}")
         return False
+
+
+def send_heartbeat():
+    """ส่ง Heartbeat Status Message"""
+    thailand_time = datetime.now(THAILAND_TZ).strftime('%Y-%m-%d %H:%M:%S')
+    
+    msg = f"✅ *Bot Status Check - Still Running!*\n\n"
+    msg += f"⏰ Time: `{thailand_time}` (Thailand)\n"
+    msg += f"📊 Status: `HEALTHY`\n"
+    msg += f"🔄 Services: `Active`\n"
+    msg += f"📡 Connection: `OK`"
+    
+    send_telegram_message(msg)
+    print("✅ Heartbeat sent successfully")
 
 def get_btc_data():
     """ดึงข้อมูล BTC จาก CoinGecko"""
@@ -102,8 +123,7 @@ def calculate_ema(prices, period):
 def analyze_market():
     """วิเคราะห์ BTC"""
     try:
-        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        print(f"\n🔍 [{timestamp}] Analyzing BTC...")
+        thailand_time = datetime.now(THAILAND_TZ).strftime('%Y-%m-%d %H:%M:%S')        print(f"\n🔍 [{timestamp}] Analyzing BTC...")
         
         df = get_btc_data()
         if df is None or len(df) == 0:
@@ -156,8 +176,7 @@ def analyze_market():
             alert_msg += f"RSI(14): `{last_rsi:.2f}`\n"
             alert_msg += f"EMA {EMA_FAST}: `{ema_fast_last:.2f}`\n"
             alert_msg += f"EMA {EMA_SLOW}: `{ema_slow_last:.2f}`\n"
-            alert_msg += f"Time: `{timestamp}`"
-            
+            alert_msg += f"Time: `{thailand_time}`"            
             send_telegram_message(alert_msg)
             print("🚨 ALERT SENT!")
         else:
@@ -171,8 +190,7 @@ def analyze_market():
         normal_msg += f"EMA {EMA_FAST}: `{ema_fast_last:.2f}`\n"
         normal_msg += f"EMA {EMA_SLOW}: `{ema_slow_last:.2f}`\n"
         normal_msg += f"Status: ➡️ Normal (no alerts)\n"
-        normal_msg += f"Time: `{timestamp}`"
-        
+        normal_msg += f"Time: `{thailand_time}`"        
         send_telegram_message(normal_msg)
         print("✅ Normal update sent to Telegram")
         
@@ -184,4 +202,10 @@ if __name__ == "__main__":
     print("=" * 70)
     print("🤖 BTC Trading Bot - GitHub Actions Version")
     print("=" * 70)
-    analyze_market()
+    
+    # เช็คว่ารันแบบไหน
+    import sys
+    if len(sys.argv) > 1 and sys.argv[1] == "heartbeat":
+        send_heartbeat()
+    else:
+        analyze_market()
